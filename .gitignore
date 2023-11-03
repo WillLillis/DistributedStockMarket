@@ -1,0 +1,6 @@
+.vs/*
+/src/catalog/transaction_log.csv
+/src/catalog/market_persistent.csv
+/.vs/slnx.sqlite
+/src/order/transaction_log.csv
+/src/order/transaction_log.csv

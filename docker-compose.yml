@@ -1,0 +1,77 @@
+version: "3.9"
+services:
+  frontend:
+    image: frontend
+    depends_on:
+      - order
+      - order1
+      - order2
+      - catalog
+    environment:
+      - DISABLE_CACHE
+    build:
+      context: .
+      dockerfile: src/front-end/Dockerfile
+    ports:
+      - "5000:5000"
+  catalog:
+    image: catalog
+    build:
+      context: .
+      dockerfile: src/catalog/Dockerfile
+    ports:
+      - "50053:50053"
+    volumes:
+      - catalog:/catalog
+  order:
+    image: order
+    command: sh -c 'python3 -u order/order_service.py'
+    build:
+      context: .
+      dockerfile: src/order/Dockerfile
+    ports:
+      - "50054:50054"
+    environment:
+      - ORDER_PORT=50054
+      - REPLICA_HOST_1=order1
+      - REPLICA_HOST_2=order2
+      - RESTART
+    volumes:
+      - order:/order
+  order1:
+    image: order
+    command: sh -c 'python3 -u order/order_service.py'
+    build:
+      context: .
+      dockerfile: src/order/Dockerfile
+    ports:
+      - "50055:50055"
+    environment:
+      - ORDER_PORT=50055
+      - ORDER_HOST=order1
+      - REPLICA_HOST_1=order
+      - REPLICA_HOST_2=order2
+      - RESTART
+    volumes:
+      - order:/order
+  order2:
+    image: order
+    command: sh -c 'python3 -u order/order_service.py'
+    build:
+      context: .
+      dockerfile: src/order/Dockerfile
+    ports:
+      - "50056:50056"
+    environment:
+      - ORDER_PORT=50056
+      - ORDER_HOST=order2
+      - REPLICA_HOST_1=order
+      - REPLICA_HOST_2=order1
+      - RESTART
+    volumes:
+      - order:/order
+volumes:
+  catalog:
+    external: false
+  order:
+    external: false
